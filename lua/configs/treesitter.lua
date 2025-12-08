@@ -3,8 +3,23 @@ pcall(function()
 	dofile(vim.g.base46_cache .. "treesitter")
 end)
 
+vim.filetype.add({
+	extension = { sdf = "xml" },
+})
+
 return {
-	ensure_installed = { "lua", "luadoc", "printf", "vim", "vimdoc" },
+	ensure_installed = {
+		"lua",
+		"luadoc",
+		"printf",
+		"vim",
+		"vimdoc",
+		"python",
+		"c",
+		"cpp",
+		"java",
+		"xml",
+	},
 
 	highlight = {
 		enable = true,
@@ -13,4 +28,3 @@ return {
 
 	indent = { enable = true },
 }
-
