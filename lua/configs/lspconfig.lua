@@ -1,98 +1,85 @@
 local M = {}
+local map = vim.keymap.set
 
-M.setup = function()
-	-- Function for setting up key mappings
-	local function setup_lsp_keymaps(bufnr)
-		local map = function(keys, func, desc, mode)
-			mode = mode or "n"
-			vim.keymap.set(mode, keys, func, { buffer = bufnr, desc = "LSP: " .. desc })
-		end
+-- export on_attach & capabilities
+M.on_attach = function(_, bufnr)
+    local function opts(desc)
+        return { buffer = bufnr, desc = "LSP " .. desc }
+    end
 
-		map("gd", require("telescope.builtin").lsp_definitions, "[G]oto [D]efinition")
-		map("gr", require("telescope.builtin").lsp_references, "[G]oto [R]eferences")
-		map("gI", require("telescope.builtin").lsp_implementations, "[G]oto [I]mplementation")
-		map("<leader>D", require("telescope.builtin").lsp_type_definitions, "Type [D]efinition")
-		map("<leader>ds", require("telescope.builtin").lsp_document_symbols, "[D]ocument [S]ymbols")
-		map("<leader>ws", require("telescope.builtin").lsp_dynamic_workspace_symbols, "[W]orkspace [S]ymbols")
-		map("<leader>rn", vim.lsp.buf.rename, "[R]e[n]ame")
-		map("<leader>ca", vim.lsp.buf.code_action, "[C]ode [A]ction", { "n", "x" })
-		map("gD", vim.lsp.buf.declaration, "[G]oto [D]eclaration")
-	end
+    map("n", "gD", vim.lsp.buf.declaration, opts "Go to declaration")
+    map("n", "gd", vim.lsp.buf.definition, opts "Go to definition")
+    map("n", "<leader>wa", vim.lsp.buf.add_workspace_folder, opts "Add workspace folder")
+    map("n", "<leader>wr", vim.lsp.buf.remove_workspace_folder, opts "Remove workspace folder")
 
-	vim.api.nvim_create_autocmd("LspAttach", {
-		callback = function(event)
-			setup_lsp_keymaps(event.buf)
-		end,
-	})
-	local capabilities = vim.lsp.protocol.make_client_capabilities()
-	capabilities = vim.tbl_deep_extend("force", capabilities, require("cmp_nvim_lsp").default_capabilities())
+    map("n", "<leader>wl", function()
+        print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+    end, opts "List workspace folders")
 
-	-- LSP servers setup
-	local servers = {
-		ts_ls = {},
-		pylsp = {},
-		lua_ls = {},
-		html = { filetypes = { "html", "twig", "hbs" } },
-		cssls = {},
-		tailwindcss = {},
-		dockerls = {},
-		jsonls = {},
-		clangd = {},
-		lemminx = { filetypes = { "xml", "sdf" } },
-	}
+    map("n", "<leader>D", vim.lsp.buf.type_definition, opts "Go to type definition")
+    map("n", "<leader>ra", require "nvchad.lsp.renamer", opts "NvRenamer")
+end
 
-	-- Mason setup
-	require("mason").setup({
-		PATH = "prepend", -- "skip" seems to cause the spawning error
-	})
-	require("mason-tool-installer").setup({
-		ensure_installed = vim.tbl_keys(servers),
-	})
+-- disable semanticTokens
+M.on_init = function(client, _)
+    if vim.fn.has "nvim-0.11" ~= 1 then
+        if client.supports_method "textDocument/semanticTokens" then
+            client.server_capabilities.semanticTokensProvider = nil
+        end
+    else
+        if client:supports_method "textDocument/semanticTokens" then
+            client.server_capabilities.semanticTokensProvider = nil
+        end
+    end
+end
 
-	require("mason-lspconfig").setup({
-		handlers = {
-			function(server_name)
-				local config = servers[server_name] or {}
-				config.capabilities = vim.tbl_deep_extend("force", capabilities, config.capabilities or {})
-				require("lspconfig")[server_name].setup(config)
-			end,
-		},
-	})
+M.capabilities = vim.lsp.protocol.make_client_capabilities()
 
-	-- Diagnostics setup
-	vim.diagnostic.config({
-		virtual_text = {
-			enabled = true,
-			source = "if_many",
-			spacing = 10,
-			current_line = true,
-			format = function(diagnostic)
-				if diagnostic.severity == vim.diagnostic.severity.ERROR then
-					return string.format("󰅚 %s", diagnostic.message)
-				elseif diagnostic.severity == vim.diagnostic.severity.WARN then
-					return string.format("󰀪 %s", diagnostic.message)
-				elseif diagnostic.severity == vim.diagnostic.severity.INFO then
-					return string.format("󰋽 %s", diagnostic.message)
-				elseif diagnostic.severity == vim.diagnostic.severity.HINT then
-					return string.format("󰌶 %s", diagnostic.message)
-				end
-				return diagnostic.message
-			end,
-		},
-		signs = {
-			active = true,
-		},
-		underline = true,
-		severity_sort = true,
-		float = {
-			focusable = false,
-			style = "minimal",
-			border = "rounded",
-			source = "always",
-			header = "",
-			prefix = "",
-		},
-	})
+M.capabilities.textDocument.completion.completionItem = {
+    documentationFormat = { "markdown", "plaintext" },
+    snippetSupport = true,
+    preselectSupport = true,
+    insertReplaceSupport = true,
+    labelDetailsSupport = true,
+    deprecatedSupport = true,
+    commitCharactersSupport = true,
+    tagSupport = { valueSet = { 1 } },
+    resolveSupport = {
+        properties = {
+            "documentation",
+            "detail",
+            "additionalTextEdits",
+        },
+    },
+}
+
+M.defaults = function()
+    dofile(vim.g.base46_cache .. "lsp")
+    require("nvchad.lsp").diagnostic_config()
+
+    vim.api.nvim_create_autocmd("LspAttach", {
+        callback = function(args)
+            M.on_attach(_, args.buf)
+        end,
+    })
+
+    local lua_lsp_settings = {
+        Lua = {
+            runtime = { version = "LuaJIT" },
+            workspace = {
+                library = {
+                    vim.fn.expand "$VIMRUNTIME/lua",
+                    vim.fn.stdpath "data" .. "/lazy/ui/nvchad_types",
+                    vim.fn.stdpath "data" .. "/lazy/lazy.nvim/lua/lazy",
+                    "${3rd}/luv/library",
+                },
+            },
+        },
+    }
+    -- Use new vim.lsp.config API for Neovim 0.11+
+    vim.lsp.config("*", { capabilities = M.capabilities, on_init = M.on_init })
+    vim.lsp.config("lua_ls", { settings = lua_lsp_settings })
+    vim.lsp.enable "lua_ls"
 end
 
 return M
