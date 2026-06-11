@@ -22,6 +22,7 @@ map("v", "<C-c>", "y", { desc = "general copy" })
 map("n", "<leader>n", "<cmd>set nu!<CR>", { desc = "toggle line number" })
 map("n", "<leader>rn", "<cmd>set rnu!<CR>", { desc = "toggle relative number" })
 map("n", "<leader>ch", "<cmd>NvCheatsheet<CR>", { desc = "toggle nvcheatsheet" })
+-- map("n", "<leader>m", "<cmd>RenderMarkdown toggle<CR>", { desc = "toggle markdown preview" })
 map({ "n", "x" }, "<leader>fm", function()
     require("conform").format { lsp_fallback = true }
 end, { desc = "general format file" })
@@ -56,8 +57,8 @@ if require("nvconfig").ui.tabufline.enabled then
 end
 
 -- Comment
-map("n", "<leader>/", "gcc", { desc = "toggle comment", remap = true })
-map("v", "<leader>/", "gc", { desc = "toggle comment", remap = true })
+map("n", "<C-c>/", "gcc", { desc = "toggle comment", remap = true })
+map("v", "<C-c>/", "gc", { desc = "toggle comment", remap = true })
 
 -- nvimtree
 map("n", "<C-n>", "<cmd>NvimTreeToggle<CR>", { desc = "nvimtree toggle window" })
