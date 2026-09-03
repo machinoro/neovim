@@ -17,6 +17,13 @@ return {
         mappings = {
             n = { ["q"] = require("telescope.actions").close },
         },
+        file_ignore_patterns = {
+            "node_modules/",
+            "%.git/",
+            "build/",
+            "devel/",
+            "log/",
+        },
     },
 
     extensions_list = { "themes", "terms" },

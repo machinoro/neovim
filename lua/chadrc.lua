@@ -15,6 +15,11 @@ M.base46 = {
 }
 
 -- M.nvdash = { load_on_startup = true }
+M.ui = {
+    tabufline = {
+        order = { "buffers", "tabs", "btns", "treeOffset" } -- Moved 'treeOffset' to the end
+    },
+}
 -- M.ui = {
 --       tabufline = {
 --          lazyload = false
