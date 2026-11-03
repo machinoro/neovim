@@ -2,7 +2,26 @@ require("configs.lspconfig").defaults()
 
 local servers = {
     ts_ls = {},
-    pylsp = {},
+    pylsp = {
+        settings = {
+            pylsp = {
+                plugins = {
+                    yapf = { enabled = false },
+                    autopep8 = { enabled = true },
+                    pycodestyle = {
+                        enabled = true,
+                        ignore = { "E501" },
+                        maxLineLength = 300,
+                    },
+                    flake8 = {
+                        enabled = true,
+                        extendIgnore = { "E501" },
+                        maxLineLength = 300,
+                    },
+                },
+            },
+        },
+    },
     lua_ls = {},
     html = { filetypes = { "html", "twig", "hbs" } },
     cssls = {},

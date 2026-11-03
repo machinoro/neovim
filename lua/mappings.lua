@@ -1,4 +1,5 @@
 local map = vim.keymap.set
+map("n", "<Esc>", "<cmd>nohlsearch<CR>")
 
 map("i", "<C-h>", "<Left>", { desc = "move left" })
 map("i", "<C-l>", "<Right>", { desc = "move right" })
@@ -15,6 +16,7 @@ map("n", "<C-k>", "<C-w>k", { desc = "switch window up" })
 map({ "n", "v", "i" }, "<C-s>", "<cmd>w<CR>", { desc = "general save file" })
 map({ "n", "v", "i" }, "<C-a>", "ggVG", { desc = "general select all" })
 map({ "n", "v", "i" }, "<C-z>", "<cmd>u<CR>", { desc = "general undo changes" })
+map({ "n", "v", "i" }, "<C-q>", "<cmd>confirm qa<CR>", { desc = "general quit all windows to terminal" })
 map("v", "<C-c>", "y", { desc = "general copy" })
 
 -- split windows
@@ -22,10 +24,10 @@ map("n", "<leader>sh", "<C-w>v", { desc = "split window vertically" })
 map("n", "<leader>sv", "<C-w>s", { desc = "split window horizontally" })
 map("n", "<leader>se", "<C-w>=", { desc = "split equalize split sizes" })
 map("n", "<leader>sc", ":close<CR>", { desc = "split close current split" })
-map("n", "<A-S-Up>", "<cmd>resize +2<CR>", { desc = "split resize increase height" })
-map("n", "<A-S-Down>", "<cmd>resize -2<CR>", { desc = "split resize decrease height" })
-map("n", "<A-S-Right>", "<cmd>vertical resize +2<CR>", { desc = "split resize increase width" })
-map("n", "<A-S-Left>", "<cmd>vertical resize -2<CR>", { desc = "split resize decrease width" })
+map("n", "<C-Down>", "<cmd>resize +2<CR>", { desc = "split resize increase height" })
+map("n", "<C-Up>", "<cmd>resize -2<CR>", { desc = "split resize decrease height" })
+map("n", "<C-Right>", "<cmd>vertical resize +2<CR>", { desc = "split resize increase width" })
+map("n", "<C-Left>", "<cmd>vertical resize -2<CR>", { desc = "split resize decrease width" })
 
 -- global lsp mappings
 map("n", "<leader>ds", vim.diagnostic.setloclist, { desc = "LSP diagnostic loclist" })
@@ -33,15 +35,12 @@ map("n", "<leader>ds", vim.diagnostic.setloclist, { desc = "LSP diagnostic locli
 -- tabufline
 if require("nvconfig").ui.tabufline.enabled then
     map("n", "<leader>b", "<cmd>enew<CR>", { desc = "buffer new" })
-
     map("n", "<A-tab>", function()
         require("nvchad.tabufline").next()
     end, { desc = "buffer goto next" })
-
     map("n", "<S-tab>", function()
         require("nvchad.tabufline").prev()
     end, { desc = "buffer goto prev" })
-
     map("n", "<leader>q", function()
         require("nvchad.tabufline").close_buffer()
     end, { desc = "buffer close" })
@@ -53,8 +52,12 @@ map("n", "<leader>e", "<cmd>NvimTreeFocus<CR>", { desc = "nvimtree focus window"
 
 -- telescope
 map("n", "<leader>ff", "<cmd>Telescope find_files<CR>", { desc = "telescope find files" })
-map("n", "<leader>fa", "<cmd>Telescope find_files follow=true no_ignore=true hidden=true<CR>",
-    { desc = "telescope find all files" })
+map(
+    "n",
+    "<leader>fa",
+    "<cmd>Telescope find_files follow=true no_ignore=true hidden=true<CR>",
+    { desc = "telescope find all files" }
+)
 map("n", "<leader>fw", "<cmd>Telescope live_grep<CR>", { desc = "telescope live grep" })
 map("n", "<leader>fb", "<cmd>Telescope buffers<CR>", { desc = "telescope find buffers" })
 map("n", "<leader>fz", "<cmd>Telescope current_buffer_fuzzy_find<CR>", { desc = "telescope find in current buffer" })
@@ -86,3 +89,40 @@ end, { desc = "terminal toggleable horizontal term" })
 map({ "n", "t" }, "<A-i>", function()
     require("nvchad.term").toggle { pos = "float", id = "floatTerm" }
 end, { desc = "terminal toggle floating term" })
+
+-- python venv selector
+map("n", "<leader>pt", "<cmd>VenvSelect<CR>", { desc = "Open Python venv/conda selector" })
+
+-- remote-nvim
+map("n", "<leader>rs", "<cmd>RemoteStart<CR>", { desc = "Remote: Start session" })
+map("n", "<leader>ro", "<cmd>RemoteStop<CR>", { desc = "Remote: Stop session" })
+map("n", "<leader>ri", "<cmd>RemoteInfo<CR>", { desc = "Remote: Session info" })
+map("n", "<leader>rc", "<cmd>RemoteCleanup<CR>", { desc = "Remote: Cleanup remote host" })
+map("n", "<leader>rl", "<cmd>RemoteLog<CR>", { desc = "Remote: View logs" })
+
+-- avante.nvim
+map("n", "<leader>aa", function()
+    require("avante.api").ask()
+end, { desc = "Avante - Ask / toggle sidebar" })
+map({ "n", "v" }, "<leader>ae", function()
+    require("avante.api").edit()
+end, { desc = "Avante - Edit selected code" })
+map("n", "<leader>ar", function()
+    require("avante.api").refresh()
+end, { desc = "Avante - Refresh sidebar" })
+map("n", "<leader>af", function()
+    require("avante.api").focus()
+end, { desc = "Avante - Focus sidebar" })
+map("n", "<leader>at", function()
+    require("avante.api").toggle()
+end, { desc = "Avante - Toggle sidebar" })
+
+-- Copilot
+map("n", "<leader>gt", function()
+    if not package.loaded["copilot"] then
+        pcall(function()
+            require("lazy").load { plugins = { "copilot.lua" } }
+        end)
+    end
+    require("copilot.suggestion").toggle_auto_trigger()
+end, { desc = "Copilot: Toggle auto-trigger suggestions" })

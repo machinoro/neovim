@@ -6,24 +6,34 @@
 local M = {}
 
 M.base46 = {
-    theme = "dark_horizon",
-
-    -- hl_override = {
-    -- 	Comment = { italic = true },
-    -- 	["@comment"] = { italic = true },
-    -- },
+    theme = "catppuccin",
 }
 
--- M.nvdash = { load_on_startup = true }
+local function get_avante_width()
+    for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+        if vim.api.nvim_win_is_valid(win) then
+            local buf = vim.api.nvim_win_get_buf(win)
+            if vim.bo[buf].ft == "Avante" or vim.bo[buf].ft == "AvanteInput" then
+                return vim.api.nvim_win_get_width(win)
+            end
+        end
+    end
+    return 0
+end
+
 M.ui = {
     tabufline = {
-        order = { "buffers", "tabs", "btns", "treeOffset" } -- Moved 'treeOffset' to the end
+        order = { "avanteOffset", "buffers", "tabs", "btns", "treeOffset" },
+        modules = {
+            avanteOffset = function()
+                local w = get_avante_width()
+                if w == 0 then
+                    return ""
+                end
+                return "%#NvimTreeNormal#" .. string.rep(" ", w) .. "%#NvimTreeWinSeparator#" .. "│"
+            end,
+        },
     },
 }
--- M.ui = {
---       tabufline = {
---          lazyload = false
---      }
--- }
 
 return M

@@ -63,6 +63,41 @@ M.defaults = function()
         end,
     })
 
+    -- Disable warning diagnostics overall across virtual text, signs, and underline
+    local severities = {
+        vim.diagnostic.severity.ERROR,
+        vim.diagnostic.severity.INFO,
+        vim.diagnostic.severity.HINT,
+    }
+    vim.diagnostic.config {
+        virtual_text = { severity = severities },
+        signs = { severity = severities },
+        underline = { severity = severities },
+    }
+
+    -- Suppress all LSP warning diagnostics
+    local orig_publish = vim.lsp.handlers["textDocument/publishDiagnostics"]
+    vim.lsp.handlers["textDocument/publishDiagnostics"] = function(err, result, ctx, config)
+        if result and result.diagnostics then
+            result.diagnostics = vim.tbl_filter(function(d)
+                return d.severity ~= vim.lsp.protocol.DiagnosticSeverity.Warning
+            end, result.diagnostics)
+        end
+        return orig_publish(err, result, ctx, config)
+    end
+
+    local orig_diagnostic = vim.lsp.handlers["textDocument/diagnostic"]
+    if orig_diagnostic then
+        vim.lsp.handlers["textDocument/diagnostic"] = function(err, result, ctx, config)
+            if result and result.items then
+                result.items = vim.tbl_filter(function(d)
+                    return d.severity ~= vim.lsp.protocol.DiagnosticSeverity.Warning
+                end, result.items)
+            end
+            return orig_diagnostic(err, result, ctx, config)
+        end
+    end
+
     local lua_lsp_settings = {
         Lua = {
             runtime = { version = "LuaJIT" },
@@ -73,6 +108,10 @@ M.defaults = function()
                     vim.fn.stdpath "data" .. "/lazy/lazy.nvim/lua/lazy",
                     "${3rd}/luv/library",
                 },
+            },
+            diagnostics = {
+                globals = { "vim" },
+                disable = { "trailing-space" },
             },
         },
     }

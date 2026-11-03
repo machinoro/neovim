@@ -36,18 +36,20 @@ return {
                     error_sign = true,
                     use_treesitter = true,
                     delay = 0,
-                    style = "#686868",
+                    style = {
+                        "#808080",
+                    },
                 },
                 indent = {
                     enable = true,
-                    style = "#131A1B",
+                    style = "Comment",
                 },
                 blank = {
                     enable = false,
                 },
                 line_num = {
                     enable = true,
-                    style = "#686868",
+                    style = "Comment",
                 },
             }
         end,
@@ -64,8 +66,8 @@ return {
         "lukas-reineke/indent-blankline.nvim",
         event = "User FilePost",
         opts = {
-            indent = { char = "│", highlight = "IblChar" },
-            scope = { char = "│", highlight = "IblScopeChar" },
+            indent = { char = "│", highlight = "IblIndent" },
+            scope = { char = "│", highlight = "IblScope" },
         },
         config = function(_, opts)
             dofile(vim.g.base46_cache .. "blankline")
@@ -226,7 +228,72 @@ return {
         dependencies = { "nvim-treesitter/nvim-treesitter" },
         lazy = false,
         config = function()
-            require("devcontainer").setup({})
+            require("devcontainer").setup {}
+        end,
+    },
+    {
+        "linux-cultist/venv-selector.nvim",
+        dependencies = {
+            "neovim/nvim-lspconfig",
+            "nvim-telescope/telescope.nvim",
+        },
+        lazy = false,
+        opts = {},
+        keys = {
+            { "<leader>pt", "<cmd>VenvSelect<cr>", desc = "Open Python venv/conda selector" },
+        },
+    },
+    {
+        "amitds1997/remote-nvim.nvim",
+        version = "*",
+        cmd = { "RemoteStart", "RemoteStop", "RemoteInfo", "RemoteCleanup", "RemoteConfigDel", "RemoteLog" },
+        dependencies = {
+            "nvim-lua/plenary.nvim",
+            "MunifTanjim/nui.nvim",
+            "nvim-telescope/telescope.nvim",
+        },
+        config = true,
+    },
+    {
+        "zbirenbaum/copilot.lua",
+        cmd = "Copilot",
+        event = "InsertEnter",
+        opts = function()
+            return require "configs.copilot"
+        end,
+    },
+    {
+        "stevearc/dressing.nvim",
+        lazy = true,
+        opts = {},
+    },
+    {
+        "yetone/avante.nvim",
+        event = "VeryLazy",
+        lazy = false,
+        version = false,
+        build = vim.fn.has "win32" ~= 0 and "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false"
+            or "make || bash ./build.sh",
+        opts = function()
+            return require "configs.avante"
+        end,
+        dependencies = {
+            "nvim-treesitter/nvim-treesitter",
+            "stevearc/dressing.nvim",
+            "nvim-lua/plenary.nvim",
+            "MunifTanjim/nui.nvim",
+            "nvim-tree/nvim-web-devicons",
+            "zbirenbaum/copilot.lua",
+            "ColinKennedy/mega.cmdparse",
+            "ColinKennedy/mega.logging",
+        },
+    },
+    { "wakatime/vim-wakatime", lazy = false },
+    {
+        "lervag/vimtex",
+        lazy = false,
+        init = function()
+            require "configs.vimtex"
         end,
     },
 }

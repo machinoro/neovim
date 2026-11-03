@@ -4,7 +4,7 @@ M.setup = function()
     require("conform").setup {
         formatters_by_ft = {
             lua = { "stylua" },
-            python = { "black" },
+            python = { "autopep8" },
             rust = { "rustfmt", lsp_format = "fallback" },
             javascript = { "prettierd", "prettier", stop_after_first = true },
             c = { "my_formatter" },
@@ -24,6 +24,9 @@ M.setup = function()
             lsp_format = "fallback",
         },
         formatters = {
+            autopep8 = {
+                prepend_args = { "--max-line-length", "200" },
+            },
             my_formatter = {
                 command = "clang-format",
                 args = '--style="{BasedOnStyle: llvm, IndentWidth: 4, ColumnLimit: 10000}"',

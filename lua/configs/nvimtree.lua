@@ -1,7 +1,7 @@
 dofile(vim.g.base46_cache .. "nvimtree")
 
 return {
-    filters = { dotfiles = false },
+    filters = { dotfiles = false, git_ignored = false },
     disable_netrw = true,
     hijack_cursor = true,
     sync_root_with_cwd = true,
@@ -16,7 +16,7 @@ return {
     },
     renderer = {
         root_folder_label = false,
-        highlight_git = true,
+        highlight_git = false,
         indent_markers = { enable = true },
         icons = {
             glyphs = {
